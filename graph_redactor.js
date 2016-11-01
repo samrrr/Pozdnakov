@@ -1,5 +1,6 @@
 
 
+var array_of_models;
 
 class GRAPH
 {
@@ -77,10 +78,12 @@ class GRAPH
 
 
 
-function guist(_id,_useless,j_args)
+
+
+function guist(_id,_action,j_args)
 {
 
-
+/*
 	var selected_tool=0;
 	var pressed_button=-1;
 	var selected_button=0;
@@ -89,14 +92,15 @@ function guist(_id,_useless,j_args)
 
 	var graph;
 	   
-
-	var timer;
 	var cid;
 	var cursor={x:0,y:0,l_up:0,l_down:0,ch:0};
 
-	var img_buttons=[];
+	var img_buttons;
 
 	var razokx,razoky;
+	*/
+
+	var timer;
 
 
 
@@ -104,23 +108,31 @@ function guist(_id,_useless,j_args)
 
 	function get_gr()
 	{
-		var graph1=graph;
-		for(let i=0;i<graph1.point.length;i++)
+		let razoky=document.getElementById(this.cid).height;
+		let razokx=document.getElementById(this.cid).width;
+
+		let graph=this.graph;
+		for(let i=0;i<graph.point.length;i++)
 		{
-			graph1.point[i].x/=razokx;
-			graph1.point[i].y/=razoky;
+			graph.point[i].x/=razokx;
+			graph.point[i].y/=razoky;
 		}
-		return JSON.stringify(graph1);
-		for(let i=0;i<graph1.point.length;i++)
+		let res= JSON.stringify(graph);
+		for(let i=0;i<graph.point.length;i++)
 		{
-			graph1.point[i].x*=razokx;
-			graph1.point[i].y*=razoky;
+			graph.point[i].x*=razokx;
+			graph.point[i].y*=razoky;
 		}
+		return res;
 	}
 
 	function set_gr(_graph)
 	{
-		graph=new GRAPH(JSON.parse(_graph));
+		let razoky=document.getElementById(this.cid).height;
+		let razokx=document.getElementById(this.cid).width;
+
+		this.graph=new GRAPH(JSON.parse(_graph));
+		let graph=this.graph;
 		for(let i=0;i<graph.point.length;i++)
 		{
 			graph.point[i].x*=razokx;
@@ -134,27 +146,50 @@ function guist(_id,_useless,j_args)
 		var cv = document.getElementById(this.id);
 		var cx = document.getElementById(this.id).getContext("2d");
 
-		cursor.x=e.pageX-cv.offsetLeft;
-		cursor.y=e.pageY-cv.offsetTop;
+		let arrid=0;
+
+		for(let i=0;i<array_of_models.length;i++)
+		if(array_of_models[i].cid==this.id)
+		{
+			arrid=i;
+		}
+
+		array_of_models[arrid].cursor.x=e.pageX-cv.offsetLeft;
+		array_of_models[arrid].cursor.y=e.pageY-cv.offsetTop;
 
 		cx.beginPath();
-		cx.arc(cursor.x, cursor.y, 2, 0, 2 * Math.PI);
+		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
+
+		
+		upd.call(array_of_models[arrid]);
 	}
 
 	function on_m_down(e)
 	{
-		var cv = document.getElementById(cid);
-		var cx = document.getElementById(cid).getContext("2d");
+		let arrid=0;
 
-		cursor.x=e.pageX-cv.offsetLeft;
-		cursor.y=e.pageY-cv.offsetTop;
-		cursor.l_down=1;
-		cursor.ch=1;
+
+		var cv = document.getElementById(this.id);
+		var cx = document.getElementById(this.id).getContext("2d");
+
+		for(let i=0;i<array_of_models.length;i++)
+		if(array_of_models[i].cid==this.id)
+		{
+			arrid=i;
+		}
+
+		array_of_models[arrid].cursor.x=e.pageX-cv.offsetLeft;
+		array_of_models[arrid].cursor.y=e.pageY-cv.offsetTop;
+		array_of_models[arrid].cursor.l_down=1;
+		array_of_models[arrid].cursor.ch=1;
+
+
 		cx.beginPath();
-		cx.arc(cursor.x, cursor.y, 2, 0, 2 * Math.PI);
+		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
 
+		upd.call(array_of_models[arrid]);
 	}
 
 	function on_m_up(e)
@@ -162,23 +197,35 @@ function guist(_id,_useless,j_args)
 		var cv = document.getElementById(this.id);
 		var cx = document.getElementById(this.id).getContext("2d");
 
-		cursor.x=e.pageX-cv.offsetLeft;
-		cursor.y=e.pageY-cv.offsetTop;
-		cursor.l_up=1;
-		cursor.ch=0;
+		for(let i=0;i<array_of_models.length;i++)
+		if(array_of_models[i].cid==this.id)
+		{
+			arrid=i;
+		}
+
+
+		array_of_models[arrid].cursor.x=e.pageX-cv.offsetLeft;
+		array_of_models[arrid].cursor.y=e.pageY-cv.offsetTop;
+		array_of_models[arrid].cursor.l_up=1;
+		array_of_models[arrid].cursor.ch=0;
 		cx.beginPath();
-		cx.arc(cursor.x, cursor.y, 2, 0, 2 * Math.PI);
+		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
 
+		upd.call(array_of_models[arrid]);
 	}
 
 	function add_point(_pos)
 	{
+		let graph=this.graph;
+
 		graph.add_point(_pos);
 	}
 
 	function del_point(_pos)
 	{
+		let graph=this.graph;
+
 		for(var i=graph.n-1;i>=0;i--)
 		{
 			if((_pos.x-graph.point[i].x)*(_pos.x-graph.point[i].x)+(_pos.y-graph.point[i].y)*(_pos.y-graph.point[i].y)<10*10)
@@ -190,8 +237,12 @@ function guist(_id,_useless,j_args)
 
 	function get_near_point(_pos)
 	{
+		let graph=this.graph;
+
 		var res=-1;
 		var ras=100*100;
+
+
 
 		for(var i=0;i<graph.n;i++)
 			if(ras>(_pos.x-graph.point[i].x)*(_pos.x-graph.point[i].x)+(_pos.y-graph.point[i].y)*(_pos.y-graph.point[i].y))
@@ -205,7 +256,9 @@ function guist(_id,_useless,j_args)
 
 	function set_edge(_i1,_i2)
 	{
-		if(graph.a[_i1][_i2]==1)
+		let graph=this.graph;
+		
+		if(graph.a[_i1][_i2]!=undefined)
 		{
 			graph.del_edge(_i1,_i2);
 		}
@@ -241,6 +294,8 @@ function guist(_id,_useless,j_args)
 
 	function can_add_node(_pos)
 	{
+		let graph=this.graph;
+
 		var can_place=1;
 		for(var i=0+0;i<graph.n && can_place==1;i++)
 		for(var r=i+1;r<graph.n && can_place==1;r++)
@@ -272,8 +327,64 @@ function guist(_id,_useless,j_args)
 	 	return can_place;
 	}
 
+	function min(a,b)
+	{
+		if(a>b)
+			return b;
+		return a;
+	}
+
+	function get_near_edge(_pos)
+	{
+		let graph=this.graph;
+		let min_r=30*30;
+
+		let res=undefined;
+
+		var can_place=1;
+		for(let i=0+0;i<graph.n && can_place==1;i++)
+		for(let r=i+1;r<graph.n && can_place==1;r++)
+		if(graph.a[i][r]!=undefined)
+		{
+			let curr=min(ras(graph.point[i].x-_pos.x,graph.point[i].y-_pos.y),ras(graph.point[r].x-_pos.x,graph.point[r].y-_pos.y));
+
+
+			var px;
+			var py;
+			px=graph.point[i].x;
+			py=graph.point[i].y;
+
+			var l=ras(px-graph.point[r].x,py-graph.point[r].y);
+
+			var u=ss(px,py,graph.point[r].x,graph.point[r].y);
+
+			var l1=ras(px-_pos.x,py-_pos.y);
+
+			var u1=ss(px,py,_pos.x,_pos.y);
+
+			var new_pos=dd(u1-u,l1);
+
+			if(new_pos.x>0)
+			if(new_pos.x<l)
+				curr=Math.min(Math.abs(new_pos.y),curr);
+
+			if(curr<min_r)
+			{
+				res={i:i,r:r};
+				min_r=curr;
+			}
+
+
+	 	}
+
+
+	 	return res;
+	}
+
 	function can_add_edge(_i1,_i2)
 	{
+		let graph=this.graph;
+
 		var can_place=1;
 		for(var i=0+0;i<graph.n && can_place==1;i++)
 		if(i!=_i1 && i!=_i2)
@@ -319,6 +430,10 @@ function guist(_id,_useless,j_args)
 		//PROC
 
 		let pressed_button=this.pressed_button;
+		let selected_button=this.selected_button;
+		let selected_tool=this.selected_tool;
+
+
 		let razoky=document.getElementById(this.cid).height;
 		let razokx=document.getElementById(this.cid).width;
 
@@ -328,6 +443,7 @@ function guist(_id,_useless,j_args)
 		let graph=this.graph;
 		let cid=this.cid;
 
+		//alert(JSON.stringify(main_settings));
 
 		pressed_button=-1;
 
@@ -357,7 +473,7 @@ function guist(_id,_useless,j_args)
 			{
 				if(selected_tool==0)
 				{
-					var n_p=get_near_point({x:cursor.x,y:cursor.y});
+					var n_p=get_near_point.call(this,{x:cursor.x,y:cursor.y});
 					var is_add=0;
 
 					if(n_p!=-1)
@@ -379,33 +495,62 @@ function guist(_id,_useless,j_args)
 						is_add=0;
 
 					if(is_add==1)
-					if(can_add_node({x:cursor.x,y:cursor.y}))
+					if(can_add_node.call(this,{x:cursor.x,y:cursor.y}))
 					{
-						add_point({x:cursor.x,y:cursor.y});
+						add_point.call(this,{x:cursor.x,y:cursor.y});
 					}
 				}
 				if(selected_tool==1)
 				{
-					del_point({x:cursor.x,y:cursor.y});
-					get_gr();
+					del_point.call(this,{x:cursor.x,y:cursor.y});
+					//get_gr();
 				}
-				if(selected_tool==2)
+				if(selected_tool==5)
 				{
 					if(selected_point==-1)
 					{
-						selected_point=get_near_point({x:cursor.x,y:cursor.y});
+						selected_point=get_near_point.call(this,{x:cursor.x,y:cursor.y});
 					}
 					else
 					{
-						var np=get_near_point({x:cursor.x,y:cursor.y});
+						var np=get_near_point.call(this,{x:cursor.x,y:cursor.y});
 						if(np!=-1)
-						if(!can_add_edge(selected_point,np))
+						if(!can_add_edge.call(this,selected_point,np))
 							np=-1;
 						if(np!=-1)
 						{
-							set_edge(selected_point,np);
+							set_edge.call(this,selected_point,np);
 							selected_point=-1;
 						}
+					}
+				}
+				if(selected_tool==4)
+				{
+					//guist(cid,"get");
+				}
+				if(selected_tool==6)
+				{
+					let n_p=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+
+					if(n_p!=-1)
+					{
+						graph.point[n_p].c=(graph.point[n_p].c+1)%7;
+					}
+
+				}
+				if(selected_tool==7)
+				{
+					let edges=get_near_edge.call(this,{x:cursor.x,y:cursor.y});
+
+
+
+					if(edges!=undefined)
+					{
+						graph.a[edges.i][edges.r].c=(graph.a[edges.i][edges.r].c+1)%7;
+						if(graph.a[edges.r][edges.i]!=undefined)
+							graph.a[edges.r][edges.i].c=(graph.a[edges.r][edges.i].c+1)%7;
+
+						//alert(JSON.stringify());
 					}
 				}
 
@@ -449,15 +594,16 @@ function guist(_id,_useless,j_args)
 			//cx.strokeRect(5+i*34,razoky-32,28,28);
 			}
 			//cx.strokeRect(3+i*34,razoky-34,32,32);
-			cx.drawImage(img_buttons[main_settings.button[i]],0,0,32,32,3+i*34,razoky-34,32,32);
+			let r=0;
 
 			if(i==selected_button)
-			{
-				cx.drawImage(img_buttons[main_settings.button[i]],64,0,32,32,3+i*34,razoky-34,32,32);	
-			}
-		
+				r=2;
+
 			if(pressed_button==i)
-				cx.drawImage(img_buttons[main_settings.button[i]],32,0,32,32,3+i*34,razoky-34,32,32);
+				r=1;
+
+			cx.drawImage(img_buttons,0+i*32,0+r*32,32,32,3+i*34,razoky-34,32,32);
+
 
 		}
 
@@ -471,15 +617,32 @@ function guist(_id,_useless,j_args)
 		for(var r=0;r<graph.n;r++)
 		if(graph.a[i][r]!=undefined)
 		{
-			cx.beginPath();
-			cx.moveTo(graph.point[i].x, graph.point[i].y);
-			cx.lineTo(graph.point[r].x, graph.point[r].y);
-			cx.stroke();
-			if(i==r)
+			if(i<r ||graph.a[r][i]==undefined)
 			{
+				let pos;
+				let u;
+
+				u=ss(graph.point[i].x, graph.point[i].y,graph.point[r].x, graph.point[r].y);
+				pos=dd(u+90,2);
+
+				cx.strokeStyle = "rgbа(0, 0, 0, 0)";
+
 				cx.beginPath();
-				cx.arc(graph.point[i].x+20, graph.point[i].y, 20, 0, 7);
-				cx.stroke();
+				cx.moveTo(graph.point[i].x+pos.x, graph.point[i].y+pos.y);
+				cx.lineTo(graph.point[i].x-pos.x, graph.point[i].y-pos.y);
+				cx.lineTo(graph.point[r].x-pos.x, graph.point[r].y-pos.y);
+				cx.lineTo(graph.point[r].x+pos.x, graph.point[r].y+pos.y);
+	      		cx.closePath();
+
+				cx.fillStyle = color_num[graph.a[r][i].c];
+	      		cx.fill();
+
+				if(i==r)
+				{
+					cx.beginPath();
+					cx.arc(graph.point[i].x+20, graph.point[i].y, 20, 0, 7);
+					cx.stroke();
+				}
 			}
 		}
 
@@ -487,13 +650,38 @@ function guist(_id,_useless,j_args)
 		{
 			cx.beginPath();
 			cx.arc(graph.point[i].x, graph.point[i].y, 7, 0, 2 * Math.PI);
-			cx.stroke();
+      		cx.closePath();
+			cx.fillStyle = color_num[graph.point[i].c];
+			cx.fill();
 		}
+
+		this.pressed_button=pressed_button;
+		this.selected_button=selected_button;
+		this.selected_tool=selected_tool;
+
 	}
 
 
 
 
+
+	if(array_of_models==undefined)
+	{
+		//alert(JSON.stringify(array_of_models));
+		array_of_models=[];
+	}
+
+	var timer = setInterval(run_upd,1000);
+
+	var color_num = [
+	"#000000",
+	"#FF0000",
+	"#00FF00",
+	"#0000FF",
+	"#FFFF00",
+	"#FF00FF",
+	"#00FFFF"
+	];
 
 
 	function run_upd()
@@ -505,69 +693,95 @@ function guist(_id,_useless,j_args)
 	}
 
 
-
-
-
-
-
-
-	var array_of_models=[];
-
-	var timer = setInterval(run_upd,1000);
-
-	let arrid=array_of_models.length;
-	array_of_models[arrid]={};
-
-
-
-	let args=JSON.parse(j_args);
-
-	if(args.is_orient== undefined)
-		args.is_orient=0;
-	if(args.gui_buttons== undefined)
-		args.gui_buttons=[0,1,2];
-
-	array_of_models[arrid].img_buttons=[];
-	array_of_models[arrid].img_buttons[0] = new Image();  
-	array_of_models[arrid].img_buttons[1] = new Image();  
-	array_of_models[arrid].img_buttons[2] = new Image();  
-	array_of_models[arrid].img_buttons[3] = new Image();  
-	array_of_models[arrid].img_buttons[4] = new Image();  
-
-	array_of_models[arrid].img_buttons[0].src = 'icon_node_add.png';
-	array_of_models[arrid].img_buttons[1].src = 'icon_node_del.png';
-	array_of_models[arrid].img_buttons[2].src = 'icon_edge_mod.png';
-	array_of_models[arrid].img_buttons[3].src = 'icon_edge_add.png';
-	array_of_models[arrid].img_buttons[4].src = 'icon_edge_del.png';
-
-	alert("id:"+_id);
-	array_of_models[arrid].cid=_id;
-
-
-	array_of_models[arrid].selected_tool=0;
-	array_of_models[arrid].pressed_button=-1;
-	array_of_models[arrid].selected_button=0;
-
-	array_of_models[arrid].selected_point=-1;
-
-	//alert("1:"+graph);
-	array_of_models[arrid].graph=new GRAPH();	
-	//alert("2:"+graph);		
-
-	   
-	array_of_models[arrid].cursor={x:0,y:0,l_up:0,l_down:0,ch:0};
-
-
-	array_of_models[arrid].main_settings=
+	if(_action=="set")
 	{
-		button:args.gui_buttons
-	};
+
+		let arrid=-1;
+
+		for(let i=0;i<array_of_models.length;i++)
+		if(array_of_models[i].cid==_id)
+		{
+			arrid=i;
+		}
+
+		if(arrid != -1)
+		{
+			set_gr.call(array_of_models[arrid],j_args);			
+
+		}
+	}
+
+	if(_action=="get")
+	{
+
+		//alert(JSON.stringify(array_of_models));
+
+		let arrid=-1;
+
+		for(let i=0;i<array_of_models.length;i++)
+		if(array_of_models[i].cid==_id)
+		{
+			arrid=i;
+		}
+
+		if(arrid != -1)
+		{
+			alert(get_gr.call(array_of_models[arrid]));			
+
+		}
+	}
+
+	if(_action=="init")
+	{
 
 
-	document.getElementById(_id).onmousedown=on_m_down;
-	document.getElementById(_id).onmouseup=on_m_up;
-	document.getElementById(_id).onmousemove = on_move;
 
+
+		let arrid=array_of_models.length;
+		array_of_models[arrid]={};
+
+
+
+		let args=JSON.parse(j_args);
+
+		if(args.is_orient== undefined)
+			args.is_orient=0;
+		if(args.gui_buttons== undefined)
+			args.gui_buttons=[0,1,2];
+
+		array_of_models[arrid].img_buttons=new Image(); 
+
+		array_of_models[arrid].img_buttons.src = 'icons.png';
+
+		//alert("id:"+_id);
+		array_of_models[arrid].cid=_id;
+
+
+		array_of_models[arrid].selected_tool=0;
+		array_of_models[arrid].pressed_button=-1;
+		array_of_models[arrid].selected_button=0;
+
+		array_of_models[arrid].selected_point=-1;
+
+		//alert("1:"+graph);
+		array_of_models[arrid].graph=new GRAPH();	
+		//alert("2:"+graph);		
+
+		   
+		array_of_models[arrid].cursor={x:0,y:0,l_up:0,l_down:0,ch:0};
+
+
+		array_of_models[arrid].main_settings=
+		{
+			button:args.gui_buttons
+		};
+
+
+		document.getElementById(_id).onmousedown=on_m_down;
+		document.getElementById(_id).onmouseup=on_m_up;
+		document.getElementById(_id).onmousemove = on_move;
+
+	}
 
 }
 
