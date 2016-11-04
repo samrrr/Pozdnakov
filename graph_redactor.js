@@ -2,6 +2,8 @@
 
 var array_of_models;
 
+
+
 class GRAPH
 {
 
@@ -104,6 +106,30 @@ function guist(_id,_action,j_args)
 
 
 
+	function handle(e) 
+	{
+		//if (form.elements[e.type + 'Ignore'].checked) return;
+
+		if(e.type=='keydown')
+		{
+			var ch=String.fromCharCode(e.keyCode);
+			if (ch>='A' && ch<='Z' || ch>='0' && ch<='9')
+			{
+				let arrid;
+				for(let i=0;i<array_of_models.length;i++)
+				if(array_of_models[i].cid==this.id)
+				{
+					arrid=i;
+				}
+
+				array_of_models[arrid].keys[ch.charCodeAt(0)]=1;
+
+				//alert(JSON.stringify(array_of_models[arrid].keys));
+				upd.call(array_of_models[arrid]);
+			}
+		}
+	}
+
 
 
 	function get_gr()
@@ -192,11 +218,13 @@ function guist(_id,_action,j_args)
 		upd.call(array_of_models[arrid]);
 	}
 
+
 	function on_m_up(e)
 	{
 		var cv = document.getElementById(this.id);
 		var cx = document.getElementById(this.id).getContext("2d");
 
+		let arrid;
 		for(let i=0;i<array_of_models.length;i++)
 		if(array_of_models[i].cid==this.id)
 		{
@@ -225,10 +253,11 @@ function guist(_id,_action,j_args)
 	function del_point(_pos)
 	{
 		let graph=this.graph;
+		let main_settings=this.main_settings;
 
 		for(var i=graph.n-1;i>=0;i--)
 		{
-			if((_pos.x-graph.point[i].x)*(_pos.x-graph.point[i].x)+(_pos.y-graph.point[i].y)*(_pos.y-graph.point[i].y)<10*10)
+			if((_pos.x-graph.point[i].x)*(_pos.x-graph.point[i].x)+(_pos.y-graph.point[i].y)*(_pos.y-graph.point[i].y)<main_settings.vertex_size*main_settings.vertex_size)
 			{
 				graph.del_point(i);
 			}
@@ -295,6 +324,7 @@ function guist(_id,_action,j_args)
 	function can_add_node(_pos)
 	{
 		let graph=this.graph;
+		let main_settings=this.main_settings;
 
 		var can_place=1;
 		for(var i=0+0;i<graph.n && can_place==1;i++)
@@ -317,9 +347,9 @@ function guist(_id,_action,j_args)
 			var new_pos=dd(u1-u,l1);
 
 			if(new_pos.x>0)
-			if(new_pos.y>-8)
+			if(new_pos.y>-main_settings.vertex_size)
 			if(new_pos.x<l)
-			if(new_pos.y<8)
+			if(new_pos.y<main_settings.vertex_size)
 			{
 				can_place=0;
 			}
@@ -384,6 +414,7 @@ function guist(_id,_action,j_args)
 	function can_add_edge(_i1,_i2)
 	{
 		let graph=this.graph;
+		let main_settings=this.main_settings;
 
 		var can_place=1;
 		for(var i=0+0;i<graph.n && can_place==1;i++)
@@ -410,9 +441,9 @@ function guist(_id,_action,j_args)
 			//document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+JSON.stringify(new_pos);
 
 			if(new_pos.x>0)
-			if(new_pos.y>-8)
+			if(new_pos.y>-main_settings.vertex_size)
 			if(new_pos.x<l)
-			if(new_pos.y<8)
+			if(new_pos.y<main_settings.vertex_size)
 			{
 				can_place=0;
 			}
@@ -438,6 +469,7 @@ function guist(_id,_action,j_args)
 		let razokx=document.getElementById(this.cid).width;
 
 		let cursor=this.cursor;
+		let keys=this.keys;
 		let main_settings=this.main_settings;
 		let img_buttons=this.img_buttons;
 		let graph=this.graph;
@@ -524,10 +556,6 @@ function guist(_id,_action,j_args)
 						}
 					}
 				}
-				if(selected_tool==4)
-				{
-					//guist(cid,"get");
-				}
 				if(selected_tool==6)
 				{
 					let n_p=get_near_point.call(this,{x:cursor.x,y:cursor.y});
@@ -553,15 +581,32 @@ function guist(_id,_action,j_args)
 						//alert(JSON.stringify());
 					}
 				}
-
+				if(selected_tool==8)
+				{
+					if(selected_point==-1)
+						selected_point=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+				}
 			}
 		
+		let setkey=-1;
+		for(let i=0;i<256;i++)
+			if(keys[i]==1)
+			{
+				//alert(i);
 
+				setkey=String.fromCharCode(i);
 
+				if(selected_tool==8)
+				if(selected_point!=-1)
+				{
+					graph.point[selected_point].n=setkey;
+					selected_point=-1;
+				}
 
+			}
 
-
-
+		for(let i=0;i<256;i++)
+			keys[i]=0;
 
 		cursor.l_down=0;
 		cursor.l_up=0;
@@ -573,7 +618,7 @@ function guist(_id,_action,j_args)
 
 		cx.clearRect(0,0,razokx,razoky);
 
-		if(selected_tool==2)
+		if(selected_tool==5)
 		if(selected_point!=-1)
 		{
 			cx.beginPath();
@@ -649,10 +694,27 @@ function guist(_id,_action,j_args)
 		for(var i=0;i<graph.n;i++)
 		{
 			cx.beginPath();
-			cx.arc(graph.point[i].x, graph.point[i].y, 7, 0, 2 * Math.PI);
+			cx.arc(graph.point[i].x, graph.point[i].y, main_settings.vertex_size, 0, 2 * Math.PI);
       		cx.closePath();
 			cx.fillStyle = color_num[graph.point[i].c];
 			cx.fill();
+
+ 			cx.textBaseline = "middle";
+ 			cx.textAlign = "center";
+ 			cx.fillStyle = "#FFF";
+ 			if(graph.point[i].n)
+				cx.fillText(graph.point[i].n, graph.point[i].x, graph.point[i].y);
+		}
+
+		if(selected_tool==8)
+		if(selected_point!=-1)
+		{
+			cx.clearRect(0,0,razokx,razoky);
+
+ 			cx.textBaseline = "middle";
+ 			cx.textAlign = "center";
+ 			cx.fillStyle = "#000";
+			cx.fillText("Нажмите букву или цифру для наименования вершины.", razokx/2,razoky/2);
 		}
 
 		this.pressed_button=pressed_button;
@@ -671,7 +733,7 @@ function guist(_id,_action,j_args)
 		array_of_models=[];
 	}
 
-	var timer = setInterval(run_upd,1000);
+	//var timer = setInterval(run_upd,1000);
 
 	var color_num = [
 	"#000000",
@@ -769,25 +831,29 @@ function guist(_id,_action,j_args)
 
 		   
 		array_of_models[arrid].cursor={x:0,y:0,l_up:0,l_down:0,ch:0};
+		array_of_models[arrid].keys=[];
 
 
 		array_of_models[arrid].main_settings=
 		{
-			button:args.gui_buttons
+			button:args.gui_buttons,
+			vertex_size:document.getElementById(_id).height/40
 		};
 
 
-		document.getElementById(_id).onmousedown=on_m_down;
-		document.getElementById(_id).onmouseup=on_m_up;
+		document.getElementById(_id).onmousedown = on_m_down;
+		document.getElementById(_id).onmouseup = on_m_up;
 		document.getElementById(_id).onmousemove = on_move;
+		document.getElementById(_id).addEventListener('keydown', handle, true);
 
 	}
 
 }
 
 
-//guist('g85n73u86',JSON.stringify({is_orient:1, gui_buttons:[0,1,2,2,1,0]}));
 
+//guist('g85n73u86',JSON.stringify({is_orient:1, gui_buttons:[0,1,2,2,1,0]}));
+/*
 define(function()
 {return { 
 
@@ -795,3 +861,4 @@ define(function()
 	
 };});
 
+*/
