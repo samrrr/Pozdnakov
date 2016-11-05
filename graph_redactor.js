@@ -709,7 +709,9 @@ function guist(_id,_action,j_args)
 		if(selected_tool==8)
 		if(selected_point!=-1)
 		{
-			cx.clearRect(0,0,razokx,razoky);
+			cx.clearRect(razokx/2-200,razoky/2-10,400,20);
+			cx.strokeStyle = "rgbа(0, 0, 0, 0)";
+			cx.strokeRect(razokx/2-200,razoky/2-10,400,20);
 
  			cx.textBaseline = "middle";
  			cx.textAlign = "center";
@@ -789,7 +791,7 @@ function guist(_id,_action,j_args)
 		if(arrid != -1)
 		{
 			alert(get_gr.call(array_of_models[arrid]));			
-
+			return JSON.stringify(get_gr.call(array_of_models[arrid]));
 		}
 	}
 
