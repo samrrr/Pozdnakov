@@ -790,8 +790,8 @@ function guist(_id,_action,j_args)
 
 		if(arrid != -1)
 		{
-			alert(get_gr.call(array_of_models[arrid]));			
-			return JSON.stringify(get_gr.call(array_of_models[arrid]));
+			//alert(get_gr.call(array_of_models[arrid]));			
+			return get_gr.call(array_of_models[arrid]);
 		}
 	}
 
