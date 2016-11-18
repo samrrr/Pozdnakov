@@ -353,7 +353,19 @@ function get_chain(_gr,_cyc,_id)
 	ray_vertex[0]=startp;
 	_gr.point[startp].cid=0;
 
-	let text="ray:"+startp;
+
+	let baaaad_chain=[startp,-1,startp];
+
+	
+
+	for(let i=0;i<_gr.n;i++)
+		if(i!=startp)
+		if(_gr.a[startp][i]!=undefined)
+			if(_gr.a[startp][i].n==_id)
+			if(_gr.point[i].cid<0)
+			{
+				baaaad_chain[1]=i;
+			}
 
 	while(frontv!=lastv)
 	{
@@ -366,7 +378,6 @@ function get_chain(_gr,_cyc,_id)
 				if(_gr.point[i].cid<0)
 				{
 					_gr.point[i].cid=_gr.point[cur].cid+1;
-					text+=i;
 					ray_vertex[frontv]=i;
 					frontv=(frontv+1)%ray_end;
 				}
@@ -386,7 +397,11 @@ function get_chain(_gr,_cyc,_id)
 	}
 
 	if(endp==-1)
+	{
+		if(baaaad_chain[1]!=-1)
+			return baaaad_chain;
 		return;
+	}
 	//alert(startp+" "+endp);
 
 	let b=0;
@@ -410,6 +425,7 @@ function get_chain(_gr,_cyc,_id)
 				chain[lastp]=i;
 				endp=i;
 				i=_gr.n;
+
 			}
 
 		}
@@ -615,6 +631,31 @@ function is_planar(_gr)
 				}
 
 				//test
+				//если получилось так, что после деления цикла на 2 из одиноких граней одного можно до одиноких другого добраться то не планарный граф
+
+				for(let i=0;i<div_res.c1v.length;i++)
+				{
+					for(let r=0;r<_gr.n;r++)
+						if(_gr.a[div_res.c1v[i]][r]!=null)
+						{
+							if(_gr.a[div_res.c1v[i]][r].n==col2)
+								return false;
+						}
+				} 
+
+				for(let i=0;i<div_res.c2v.length;i++)
+				{
+					for(let r=0;r<_gr.n;r++)
+						if(_gr.a[div_res.c2v[i]][r]!=null)
+						{
+							if(_gr.a[div_res.c2v[i]][r].n==col1)
+								return false;
+						}
+				} 
+
+				for(let i=0;i<div_res.c2v.length;i++)
+				{
+				} 
 
 
 				let col3=cyclohran.length+10;
@@ -756,14 +797,14 @@ function is_planar(_gr)
 		}
 	}
 
-	for(let i=0;i<_gr.n;i++)
-	for(let r=0;r<_gr.n;r++)
-	if(_gr.a[i][r]!=null)
-		_gr.a[i][r].c=_gr.a[i][r].n;
+	//for(let i=0;i<_gr.n;i++)
+	//for(let r=0;r<_gr.n;r++)
+	//if(_gr.a[i][r]!=null)
+	//	_gr.a[i][r].c=_gr.a[i][r].n;
 
-	for(let i=0;i<_gr.n;i++)
-		_gr.point[i].n=i;
-
+	//for(let i=0;i<_gr.n;i++)
+	//	_gr.point[i].n=i;
+	return true;
 }
 
 
