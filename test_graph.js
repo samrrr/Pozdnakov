@@ -690,7 +690,7 @@ function is_planar(_gr)
 				}
 
 				let segmentcol=new Array(segment.length);//массив принадлежности сегмента к внутренности цикла
-				alert(JSON.stringify(segment));
+				//alert(JSON.stringify(segment));
 
 
 
@@ -791,6 +791,7 @@ function is_planar(_gr)
 			}
 			else
 			{
+				document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>Это грань:"+JSON.stringify(cyclohran[nc]);
 				cyclohran[nc].end=1;
 			}
 
