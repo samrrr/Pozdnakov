@@ -82,6 +82,8 @@ class GRAPH
 
 
 
+
+
 function guist(_id,_action,j_args)
 {
 
@@ -125,7 +127,7 @@ function guist(_id,_action,j_args)
 				array_of_models[arrid].keys[ch.charCodeAt(0)]=1;
 
 				//alert(JSON.stringify(array_of_models[arrid].keys));
-				upd.call(array_of_models[arrid]);
+				//upd.call(array_of_models[arrid]);
 			}
 		}
 	}
@@ -183,12 +185,12 @@ function guist(_id,_action,j_args)
 		array_of_models[arrid].cursor.x=e.pageX-cv.offsetLeft;
 		array_of_models[arrid].cursor.y=e.pageY-cv.offsetTop;
 
-		cx.beginPath();
-		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
-		cx.stroke();
+		//cx.beginPath();
+		//cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
+		//cx.stroke();
 
 		
-		upd.call(array_of_models[arrid]);
+		//upd.call(array_of_models[arrid]);
 	}
 
 	function on_m_down(e)
@@ -215,7 +217,7 @@ function guist(_id,_action,j_args)
 		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
 
-		upd.call(array_of_models[arrid]);
+		//upd.call(array_of_models[arrid]);
 	}
 
 
@@ -240,7 +242,7 @@ function guist(_id,_action,j_args)
 		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
 
-		upd.call(array_of_models[arrid]);
+		//upd.call(array_of_models[arrid]);
 	}
 
 	function add_point(_pos)
@@ -453,6 +455,13 @@ function guist(_id,_action,j_args)
 
 	function upd()
 	{
+
+		if(this.is_drawing_now==1)
+			return;
+
+		this.is_drawing_now=1;
+		//document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"1 upd";
+
 		var cx = document.getElementById(this.cid).getContext("2d");
 
 		//alert(this.cid);
@@ -532,11 +541,28 @@ function guist(_id,_action,j_args)
 						add_point.call(this,{x:cursor.x,y:cursor.y});
 					}
 				}
+
 				if(selected_tool==1)
 				{
 					del_point.call(this,{x:cursor.x,y:cursor.y});
 					//get_gr();
 				}
+
+				if(selected_tool==2)
+				{
+					if(selected_point==-1)
+					{
+						selected_point=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+					}
+					else
+					{
+						graph.point[selected_point].x=cursor.x;
+						graph.point[selected_point].y=cursor.y;
+
+						selected_point=-1;
+					}
+				}
+
 				if(selected_tool==5)
 				{
 					if(selected_point==-1)
@@ -556,6 +582,7 @@ function guist(_id,_action,j_args)
 						}
 					}
 				}
+
 				if(selected_tool==6)
 				{
 					let n_p=get_near_point.call(this,{x:cursor.x,y:cursor.y});
@@ -566,8 +593,10 @@ function guist(_id,_action,j_args)
 					}
 
 				}
+
 				if(selected_tool==7)
 				{
+					is_planar(graph);
 					let edges=get_near_edge.call(this,{x:cursor.x,y:cursor.y});
 
 
@@ -581,6 +610,7 @@ function guist(_id,_action,j_args)
 						//alert(JSON.stringify());
 					}
 				}
+
 				if(selected_tool==8)
 				{
 					if(selected_point==-1)
@@ -679,7 +709,10 @@ function guist(_id,_action,j_args)
 				cx.lineTo(graph.point[r].x+pos.x, graph.point[r].y+pos.y);
 	      		cx.closePath();
 
-				cx.fillStyle = color_num[graph.a[r][i].c];
+	      		if(graph.a[r][i].c>=0)
+					cx.fillStyle = color_num[graph.a[r][i].c];
+				else
+					cx.fillStyle ="#777";
 	      		cx.fill();
 
 				if(i==r)
@@ -703,7 +736,10 @@ function guist(_id,_action,j_args)
  			cx.textAlign = "center";
  			cx.fillStyle = "#FFF";
  			if(graph.point[i].n)
-				cx.fillText(graph.point[i].n, graph.point[i].x, graph.point[i].y);
+				cx.fillText("("+i+")"+graph.point[i].n, graph.point[i].x, graph.point[i].y);
+			else
+				cx.fillText("("+i+")", graph.point[i].x, graph.point[i].y);
+
 		}
 
 		if(selected_tool==8)
@@ -722,6 +758,8 @@ function guist(_id,_action,j_args)
 		this.pressed_button=pressed_button;
 		this.selected_button=selected_button;
 		this.selected_tool=selected_tool;
+		this.is_drawing_now=0;
+		//document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"0 upd";
 
 	}
 
@@ -735,7 +773,7 @@ function guist(_id,_action,j_args)
 		array_of_models=[];
 	}
 
-	//var timer = setInterval(run_upd,1000);
+	var timer = setInterval(run_upd,100);
 
 	var color_num = [
 	"#000000",
@@ -826,6 +864,7 @@ function guist(_id,_action,j_args)
 		array_of_models[arrid].selected_button=0;
 
 		array_of_models[arrid].selected_point=-1;
+		array_of_models[arrid].is_drawing_now=0;
 
 		//alert("1:"+graph);
 		array_of_models[arrid].graph=new GRAPH();	
