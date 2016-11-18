@@ -52,6 +52,12 @@ function test_dvudolnost(_gr)//return true false
 	return true;
 }
 
+function outputToLog(text)
+{
+	document.getElementById("logs").innerHTML =
+	document.getElementById("logs").innerHTML+"<br>"+text;
+}
+
 function test_polnaia_dvudolnost(_gr)//return true false
 {		
 	if(!test_dvudolnost(_gr))
@@ -505,17 +511,20 @@ function tear_shmatki(_shmatki,_id_tears)
 		}
 	}
 
-	shm_sh[shm_sh.length]=sh_to_tear.slice(last_div_point);
-	shm_sh[shm_sh.length-1].push(sh_to_tear[0]);
-
-	//alert(JSON.stringify(shm_sh));
-
-	//узнали какой шматок рубиться и зазрубили его на шматочечки теперь правим исходные данные
-
-	_shmatki[sh_to_tear_id]=shm_sh[0];//записываем нулевой шматочек вместо порванного
-	for(let i=1;i<shm_sh.length;i++)
+	if(shm_sh.length>0)
 	{
-		_shmatki[_shmatki.length]=shm_sh[i];//дописываем в массив шматков остальные шматочки
+		shm_sh[shm_sh.length]=sh_to_tear.slice(last_div_point);
+		shm_sh[shm_sh.length-1].push(sh_to_tear[0]);
+
+		//alert(JSON.stringify(shm_sh));
+
+		//узнали какой шматок рубиться и зазрубили его на шматочечки теперь правим исходные данные
+
+		_shmatki[sh_to_tear_id]=shm_sh[0];//записываем нулевой шматочек вместо порванного
+		for(let i=1;i<shm_sh.length;i++)
+		{
+			_shmatki[_shmatki.length]=shm_sh[i];//дописываем в массив шматков остальные шматочки
+		}
 	}
 
 	
@@ -639,7 +648,10 @@ function is_planar(_gr)
 						if(_gr.a[div_res.c1v[i]][r]!=null)
 						{
 							if(_gr.a[div_res.c1v[i]][r].n==col2)
+							{
+								document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"foll not planar ";
 								return false;
+							}
 						}
 				} 
 
@@ -649,7 +661,10 @@ function is_planar(_gr)
 						if(_gr.a[div_res.c2v[i]][r]!=null)
 						{
 							if(_gr.a[div_res.c2v[i]][r].n==col1)
+							{
+								document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"foll not planar ";
 								return false;
+							}
 						}
 				} 
 
@@ -730,9 +745,14 @@ function is_planar(_gr)
 						can1=_shmatki_can_segm(shmatki1,segment[i]);
 						can2=_shmatki_can_segm(shmatki2,segment[i]);
 
+						document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"sh1:"+JSON.stringify(shmatki1)+" sh2:"+JSON.stringify(shmatki2)+"<br>segm:"+JSON.stringify(segment[i])+" i:"+i;
+						document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"can1:"+can1+"  can2:"+can2;
 
 						if(!can1 && !can2)
+						{
+							document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"try past parts not planar ";
 							return false;
+						}
 						if(!can1 && can2 || can1 && !can2 || i == last_segm)
 						{
 							if(can1)

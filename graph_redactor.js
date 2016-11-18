@@ -298,6 +298,18 @@ function guist(_id,_action,j_args)
 			graph.add_edge(_i1,_i2);
 		}
 	}
+	function add_edge(_i1,_i2)
+	{
+		let graph=this.graph;
+		
+		graph.add_edge(_i1,_i2);
+	}
+	function del_edge(_i1,_i2)
+	{
+		let graph=this.graph;
+		
+		graph.del_edge(_i1,_i2);
+	}
 
 	function dd(c,d)
 	{
@@ -563,6 +575,45 @@ function guist(_id,_action,j_args)
 					}
 				}
 
+				if(selected_tool==3)
+				{
+					if(selected_point==-1)
+					{
+						selected_point=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+					}
+					else
+					{
+						var np=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+						if(np!=-1)
+						if(!can_add_edge.call(this,selected_point,np))
+							np=-1;
+						if(np!=-1)
+						{
+							add_edge.call(this,selected_point,np);
+							selected_point=-1;
+						}
+					}
+				}
+
+
+				if(selected_tool==4)
+				{
+					if(selected_point==-1)
+					{
+						selected_point=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+					}
+					else
+					{
+						var np=get_near_point.call(this,{x:cursor.x,y:cursor.y});
+						if(np!=-1)
+						{
+							del_edge.call(this,selected_point,np);
+							selected_point=-1;
+						}
+					}
+				}
+
+
 				if(selected_tool==5)
 				{
 					if(selected_point==-1)
@@ -648,7 +699,7 @@ function guist(_id,_action,j_args)
 
 		cx.clearRect(0,0,razokx,razoky);
 
-		if(selected_tool==5)
+		if(selected_tool==5 || selected_tool==4 || selected_tool==3)
 		if(selected_point!=-1)
 		{
 			cx.beginPath();
