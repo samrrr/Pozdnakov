@@ -647,7 +647,7 @@ function guist(_id,_action,j_args)
 
 				if(selected_tool==7)
 				{
-					is_planar(graph);
+					//is_planar(graph);
 					let edges=get_near_edge.call(this,{x:cursor.x,y:cursor.y});
 
 
@@ -698,6 +698,19 @@ function guist(_id,_action,j_args)
 		//DRAWS
 
 		cx.clearRect(0,0,razokx,razoky);
+
+		if(selected_tool==2)
+		if(selected_point!=-1)
+		{
+			//alert("ok");
+			let i=selected_point;
+			cx.beginPath();
+			cx.arc(graph.point[i].x, graph.point[i].y, main_settings.vertex_size * 1.4, 0, 2 * Math.PI);
+      		cx.closePath();
+			cx.fillStyle = "#3A3";
+			cx.fill();
+
+		}
 
 		if(selected_tool==5 || selected_tool==4 || selected_tool==3)
 		if(selected_point!=-1)
