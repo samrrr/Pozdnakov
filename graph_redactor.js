@@ -125,6 +125,7 @@ function guist(_id,_action,j_args)
 				}
 
 				array_of_models[arrid].keys[ch.charCodeAt(0)]=1;
+				array_of_models[arrid].is_need_draw=1;
 
 				//alert(JSON.stringify(array_of_models[arrid].keys));
 				//upd.call(array_of_models[arrid]);
@@ -185,6 +186,8 @@ function guist(_id,_action,j_args)
 		array_of_models[arrid].cursor.x=e.pageX-cv.offsetLeft;
 		array_of_models[arrid].cursor.y=e.pageY-cv.offsetTop;
 
+		array_of_models[arrid].is_need_draw=1;
+
 		//cx.beginPath();
 		//cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		//cx.stroke();
@@ -216,6 +219,7 @@ function guist(_id,_action,j_args)
 		cx.beginPath();
 		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
+		array_of_models[arrid].is_need_draw=1;
 
 		//upd.call(array_of_models[arrid]);
 	}
@@ -241,6 +245,7 @@ function guist(_id,_action,j_args)
 		cx.beginPath();
 		cx.arc(array_of_models[arrid].cursor.x, array_of_models[arrid].cursor.y, 2, 0, 2 * Math.PI);
 		cx.stroke();
+		array_of_models[arrid].is_need_draw=1;
 
 		//upd.call(array_of_models[arrid]);
 	}
@@ -470,6 +475,10 @@ function guist(_id,_action,j_args)
 
 		if(this.is_drawing_now==1)
 			return;
+		if(this.is_need_draw==0)
+			return;
+
+		this.is_need_draw=0;
 
 		this.is_drawing_now=1;
 		//document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"1 upd";
@@ -872,6 +881,8 @@ function guist(_id,_action,j_args)
 
 		if(arrid != -1)
 		{
+
+			array_of_models[arrid].is_need_draw=1;
 			set_gr.call(array_of_models[arrid],j_args);			
 
 		}
@@ -929,6 +940,7 @@ function guist(_id,_action,j_args)
 
 		array_of_models[arrid].selected_point=-1;
 		array_of_models[arrid].is_drawing_now=0;
+		array_of_models[arrid].is_need_draw=1;
 
 		//alert("1:"+graph);
 		array_of_models[arrid].graph=new GRAPH();	
