@@ -7,6 +7,41 @@ is_full
 is_tree
 
 */
+function sleep(milliseconds) 
+{
+            var start = (new Date()).getTime();
+            while ((new Date()).getTime() - start <= milliseconds) {
+            }
+}
+
+function gen_planar()
+{
+	let gr=new GRAPH();
+
+
+	for(let i=2;i<6;i++)
+		for(let r=2;r<6;r++)
+			gr.add_point({x:i/12.0,y:r/12.0});
+
+	let a=[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+
+	a[0][0]=1;
+
+	for(let o=0;o<100;o++)
+		{
+			let x;
+			let y;
+			x=Math.random()*3.9;
+			y=Math.random()*3.9;
+			x=Math.floor(x);
+			y=Math.floor(y);
+			let id1=x+y*4;
+			gr.add_edge(id1,0);
+		}
+
+
+	return JSON.stringify(gr);
+}
 
 function test_dvudolnost(_gr)//return true false
 {
@@ -180,22 +215,42 @@ class CYCLE
 		let top=_chain[0];
 		
 		this.sort_cycle(end);
+		if(end!=top)
+		{
+			let end_to_top = 1;
+			for (let i=0; this.node[i]!=top && i<1000; i++)
+				end_to_top++;
 
-		let end_to_top = 1;
-		for (let i=0; this.node[i]!=top && i<1000; i++)
-			end_to_top++;
-
-		let part = new Array(end_to_top);
-		for (let i=0; i<end_to_top; i++)
-			part[i] = this.node[i];	
+			let part = new Array(end_to_top);
+			for (let i=0; i<end_to_top; i++)
+				part[i] = this.node[i];	
 
 
-		this.node = [];
+			this.node = [];
 
-		let chain=[].concat(_chain);
-		chain.shift();
-		chain.pop();
-		this.node = this.node.concat(part, chain);
+			let chain=[].concat(_chain);
+			chain.shift();
+			chain.pop();
+			this.node = this.node.concat(part, chain);
+		}
+		else
+		{
+			if (!_is_invert)
+			{
+				this.node = [];
+				let chain=[].concat(_chain);
+				chain.shift();
+				this.node = this.node.concat(chain);
+				//alert(this.node);
+			}
+			else
+			{
+				let chain=[].concat(_chain);
+				chain.pop();
+				this.node = this.node.concat(chain);
+				//alert(this.node);
+			}
+		}
 	};
 
 	//hmmm	
@@ -205,10 +260,16 @@ class CYCLE
 		let chain_2 = [];
 		
 		this.sort_cycle(_end);
-		
-		chain_1 = this.node.slice(1, this.node.indexOf(_top) );
-		chain_2 = this.node.slice(this.node.indexOf(_top)+1);
-
+		if(_end!=_top)
+		{
+			chain_1 = this.node.slice(1, this.node.indexOf(_top) );
+			chain_2 = this.node.slice(this.node.indexOf(_top)+1);
+		}
+		else
+		{
+			chain_1 = [];
+			chain_2 = this.node.slice(this.node.indexOf(_top)+1);			
+		}
 		//chain_2.push(_end);
 		
 		return [chain_1, chain_2];
@@ -551,9 +612,13 @@ function _shmatki_can_segm(_shmatki,_id_tears)
 	return false;
 }
 
+let arrgr=[];
+
 function is_planar(_gr)
 {
+	arrgr=[];
 
+	let last_gr;
 
 	for(let i=0;i<_gr.n;i++)
 		for(let r=0;r<_gr.n;r++)
@@ -576,16 +641,16 @@ function is_planar(_gr)
 	//alert(JSON.stringify(_gr.n));
 
 	_gr.a[cyclohran[0].cyc[0] ][cyclohran[0].cyc[1] ].n=-1;
-	_gr.a[cyclohran[0].cyc[0] ][cyclohran[0].cyc[1] ].c=2;
+	//_gr.a[cyclohran[0].cyc[0] ][cyclohran[0].cyc[1] ].c=2;
 	_gr.a[cyclohran[0].cyc[1] ][cyclohran[0].cyc[0] ].n=-1;
-	_gr.a[cyclohran[0].cyc[1] ][cyclohran[0].cyc[0] ].c=2;
+	//_gr.a[cyclohran[0].cyc[1] ][cyclohran[0].cyc[0] ].c=2;
 
 
 	for(let i=0;i<_gr.n;i++)
 		_gr.point[i].n=0;
 
-	_gr.point[cyclohran[0].cyc[0]].c=2;
-	_gr.point[cyclohran[0].cyc[1]].c=2;
+	//_gr.point[cyclohran[0].cyc[0]].c=2;
+	//_gr.point[cyclohran[0].cyc[1]].c=2;
 	_gr.point[cyclohran[0].cyc[0]].n=-1;
 	_gr.point[cyclohran[0].cyc[1]].n=-1;
 
@@ -599,10 +664,11 @@ function is_planar(_gr)
 		if(cyclohran[nc].end==0)
 		{
 
-
 			document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+JSON.stringify(cyclohran[nc]);
 			//1-find chain
 			let cha=get_chain(_gr,cyclohran[nc].cyc,nc);
+
+
 
 
 			document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"chain: "+JSON.stringify(cha);
@@ -622,6 +688,8 @@ function is_planar(_gr)
 					//alert(cha[i+1]+" + "+cha[i]);
 				}
 
+
+
 				let div_res=full_divide(cyclohran[nc].cyc,cha);
 
 				//c1-c1v c2-c2v
@@ -639,8 +707,11 @@ function is_planar(_gr)
 					graph_fill_part(_gr,div_res.c2v[i],nc,col2);
 				}
 
+
+
+
 				//test
-				//если получилось так, что после деления цикла на 2 из одиноких граней одного можно до одиноких другого добраться то не планарный граф
+				//если получилось так, что после деления цикла на 2 из одиноких вершин одного можно до одиноких другого добраться то не планарный граф
 
 				for(let i=0;i<div_res.c1v.length;i++)
 				{
@@ -668,13 +739,15 @@ function is_planar(_gr)
 						}
 				} 
 
-				for(let i=0;i<div_res.c2v.length;i++)
-				{
-				} 
 
 
 				let col3=cyclohran.length+10;
 
+				let segmdel=[[0],[0]];
+				//let test1=[[0,1,2,3,4,5]];
+				//let test2=[1,2];
+				//tear_shmatki(test1,test2);
+				//alert(JSON.stringify(test1));  сейчас [[1,2],[2,3,4,5,0,1]]   надо [[2,3,4,5,0,1]]
 				let segment=[];
 				//[[1,5,4,6]]
 
@@ -699,13 +772,24 @@ function is_planar(_gr)
 								{
 									segment[iid][segment[iid].length]=i;
 								}
+								if(_gr.a[curr][r].n==col1 && i>0 && i<cha.length-1)
+								{
+									segmdel[0].push(i);
+								}
+								if(_gr.a[curr][r].n==col2 && i>0 && i<cha.length-1)
+								{
+									segmdel[1].push(i);
+								}
 							}
 						}
 					}
 				}
 
+
 				let segmentcol=new Array(segment.length);//массив принадлежности сегмента к внутренности цикла
+				
 				//alert(JSON.stringify(segment));
+				//outputToLog("sdel:"+JSON.stringify(segmdel));
 
 
 
@@ -717,6 +801,14 @@ function is_planar(_gr)
 				let shmatki2=[[]];
 				for(let i=0;i<cha.length;i++)
 					shmatki2[0][i]=i;
+
+				tear_shmatki(shmatki1,segmdel[0]);
+				tear_shmatki(shmatki2,segmdel[1]);
+
+				if(shmatki1.length>1)
+					shmatki1[shmatki1.length-1].length--;
+				if(shmatki2.length>1)
+					shmatki2[shmatki2.length-1].length--;
 
 
 				let b=0;
@@ -772,16 +864,9 @@ function is_planar(_gr)
 				}
 
 
-				//alert("segmentcol:"+JSON.stringify(segmentcol));
 
 
-				/*
 
-				let div_res=full_divide(cyclohran[nc].cyc,cha);
-
-				//c1-c1v c2-c2v
-
-				*/
 				//3 fill segments for join new cycles(c1,c2)
 				//
 				//
@@ -797,6 +882,8 @@ function is_planar(_gr)
 						graph_fill_part(_gr,cha[segment[i][0]],col3+i,col2);
 				}
 
+
+
 				//end=0;
 				let new_cych={cyc:div_res.c1,end:0};
 				cyclohran.push(new_cych);
@@ -806,8 +893,8 @@ function is_planar(_gr)
 				document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"c1: "+JSON.stringify(div_res.c1);
 				document.getElementById("logs").innerHTML = document.getElementById("logs").innerHTML+"<br>"+"c2: "+JSON.stringify(div_res.c2);
 
-
-				cyclohran[nc].end=2;
+				if(cha[0]!=cha[cha.length-1])
+					cyclohran[nc].end=2;
 			}
 			else
 			{

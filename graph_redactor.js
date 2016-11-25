@@ -82,6 +82,44 @@ class GRAPH
 
 
 
+function draw_rotated_text(text, x, y, angle) 
+{ 
+	this.save(); 
+
+	this.translate(x, y);
+
+	this.rotate(angle/180*Math.PI);
+
+	//this.drawImage(image, -(image.width/2), -(image.height/2));
+	let x1=this.measureText(text).width+10;
+	let y1=14;
+
+	this.clearRect(-x1/2,-y1/2,x1,y1);
+
+	this.textBaseline = "middle";
+	this.textAlign = "center";
+	
+	this.fillText(text,0,0);
+
+
+	this.restore(); 
+}
+
+
+
+
+
+function draw_rotated_text_pos(text, x, y, angle) 
+{ 
+	let x1=this.measureText(text).width+10;
+	let y1=14;
+
+	return {x:x,y:y,r:Math.sqrt(x1*x1/4+y1*y1/4)+1}
+}
+
+
+
+
 
 
 function guist(_id,_action,j_args)
@@ -565,6 +603,7 @@ function guist(_id,_action,j_args)
 
 				if(selected_tool==1)
 				{
+					//is_planar(graph);
 					del_point.call(this,{x:cursor.x,y:cursor.y});
 					//get_gr();
 				}
@@ -796,6 +835,71 @@ function guist(_id,_action,j_args)
 				}
 			}
 		}
+
+		let posarray=[];
+
+		for(var i=0;i<graph.n;i++)
+		for(var r=0;r<graph.n;r++)
+		if(i<r)
+		if(graph.a[i][r]!=undefined)
+		if(graph.a[i][r].n!=undefined)
+		{
+			let u=ss(graph.point[i].x,graph.point[i].y,graph.point[r].x,graph.point[r].y);
+			if(u>90 && u<270)
+				u-=180;
+			if(u>180)
+				u-=360;
+
+			if (u>70)
+				 u-=90;
+			if (u<-70)
+				 u+=90;
+
+			//outputToLog(JSON.stringify(posarray));
+
+			let k;
+			k=0.5;
+			let pos=draw_rotated_text_pos.call(cx,graph.a[i][r].n,(graph.point[i].x*k+graph.point[r].x*(1-k)),(graph.point[i].y*k+graph.point[r].y*(1-k)),0);
+			for(let o=0;o<posarray.length;o++)
+			{
+					//outputToLog(JSON.stringify(pos)+" "+JSON.stringify(posarray[o])+
+					//	"  rasr:"+((pos.x-posarray[o].x)*(pos.x-posarray[o].x)+(pos.y-posarray[o].y)*(pos.y-posarray[i].y))+
+					//	"  rasmin:"+((pos.r+posarray[o].r)*(pos.r+posarray[o].r))+"  pos:");
+				if( (pos.x-posarray[o].x)*(pos.x-posarray[o].x)+(pos.y-posarray[o].y)*(pos.y-posarray[o].y) < (pos.r+posarray[o].r)*(pos.r+posarray[o].r) )
+				{
+					//alert(k+" : "+o+" :r "+(pos.r)+"  rp:"+posarray[o].r );
+					if(k<0.5)
+						k=1-k;
+					else
+						k=1-k-0.05;
+
+					
+					pos=draw_rotated_text_pos.call(cx,graph.a[i][r].n,(graph.point[i].x*k+graph.point[r].x*(1-k)),(graph.point[i].y*k+graph.point[r].y*(1-k)),0);
+					o=-1;
+
+					if(k>0.85)
+					{
+						//alert("!!!!!!!!!!!!!!!!!!!!!!");
+						k=0.5;
+						o=posarray.length;
+						k=0;
+						pos=draw_rotated_text_pos.call(cx,graph.a[i][r].n,(graph.point[i].x*k+graph.point[r].x*(1-k)),(graph.point[i].y*k+graph.point[r].y*(1-k)),0);
+					}
+				}
+
+			}
+			//alert(k);
+			posarray.push(pos);
+
+			cx.fillStyle = "#000";
+			if(graph.a[i][r].n!=undefined)
+				draw_rotated_text.call(cx,graph.a[i][r].n,pos.x,pos.y,0);
+			//draw_rotated_text.call(cx,"12345",graph.point[i].x/2+graph.point[r].x/2,graph.point[i].y/2+graph.point[r].y/2,u);
+
+
+
+		}
+
 
 		for(var i=0;i<graph.n;i++)
 		{
