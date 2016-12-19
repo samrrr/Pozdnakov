@@ -87,7 +87,7 @@ function test_dvudolnost(_gr)//return true false
 	return true;
 }
 
-function outputToLog(text)
+function Log(text)
 {
 	document.getElementById("logs").innerHTML =
 	document.getElementById("logs").innerHTML+"<br>"+text;
@@ -95,48 +95,100 @@ function outputToLog(text)
 
 function test_polnaia_dvudolnost(_gr)//return true false
 {		
-	if(!test_dvudolnost(_gr))
+	//alert("is_full_dv gr:"+JSON.stringify(_gr));
+	let ma=[];
+	let col=[];
+
+	let ray_unch=0;
+
+	if(_gr.n<2)
 		return false;
 
-	var m1,m2;
-	
-	m1=[0];
-	
-	var j=1;
-	
-	for(var i=1;i<_gr.n;i++){
-		if(_gr.a[0][i]==null){
-			m1[j]=i;
-			j++;
+	let checked=0;
+	let last_free=0;
+	while(checked<_gr.n)
+	{
+		if(ma[checked]==undefined)
+		{
+			for(;ray_unch<_gr.n && ma[checked]==undefined;ray_unch++)
+			if(col[ray_unch]==undefined)
+			{
+				ma[checked]=ray_unch;
+				last_free=checked+1;
+				col[ray_unch]=1;
+					//_gr.point[ray_unch].c=4;
+			}
 		}
+
+		let cur_col=col[ma[checked]];
+
+		for(let i=0;i<_gr.n;i++)
+		if(ma[checked]!=i)
+			if(_gr.a[ma[checked]][i]!=null)
+			{
+				if(col[i]==undefined)
+				{
+					col[i]=(cur_col+1)%2;
+
+					ma[last_free]=i;
+					last_free++;
+				}
+				if(cur_col==col[i])
+					return false;
+			}
+			else
+			{
+				if(col[i] !== undefined)
+				if(col[i] !== cur_col)
+				{
+					//alert("is_full_dv[]:"+i+","+ma[checked]);
+					return false;
+				}
+			}
+		checked++;
 	}
-	
-	m2=[0];
-	
-	for(i=1;i<_gr.n && m2[0]==0;i++)
-		if(_gr.a[0][i]!=null)
-			m2[0]=i;
-		
-	if(m2[0]==0)
-		return false;
-		
-	var j=1;
-	
-	for(var i=0;i<_gr.n;i++){
-		if(m2[0]!=i && _gr.a[m2[0]][i]==null){
-			m2[j]=i;
-			j++;
-		}
-	}
-		
-	for(i=0;i<m1.length;i++)
-		for(j=0;j<m2.length;j++)
-			if(_gr.a[m1[i]][m2[j]]==null)
-				return false;
-			
+
 	return true;
+
 }
 
+
+
+function test_gr_reg(_gr)
+{
+	let graph=_gr;
+	let res;
+	let ver=-1;
+	for(let i=0;i<graph.n;i++)
+	{
+		let o;
+		o=0;
+		for(let r=0;r<graph.n;r++)
+			if(graph.a[i][r]!=undefined)
+			{
+				o++;
+			}
+
+		if(ver==-1)
+		{
+			ver=o;
+		}
+		else
+		{
+			if(o!=ver)
+				return -1;
+		}
+	}
+
+	return ver;
+}
+
+
+
+
+
+
+//????????????????????????
 function test_gr_st(_gr,_st)
 {
 	let graph=JSON.parse(_gr);
@@ -618,6 +670,8 @@ function is_planar(_gr)
 {
 	arrgr=[];
 
+	//Log("sdel:"+JSON.stringify(_gr));
+
 	let last_gr;
 
 	for(let i=0;i<_gr.n;i++)
@@ -638,7 +692,7 @@ function is_planar(_gr)
 					cyclohran[1]={cyc:[i,r],end:1};
 				}
 	
-	//alert(JSON.stringify(_gr.n));
+	//alert(JSON.stringify(_gr));
 
 	_gr.a[cyclohran[0].cyc[0] ][cyclohran[0].cyc[1] ].n=-1;
 	//_gr.a[cyclohran[0].cyc[0] ][cyclohran[0].cyc[1] ].c=2;
@@ -789,7 +843,7 @@ function is_planar(_gr)
 				let segmentcol=new Array(segment.length);//массив принадлежности сегмента к внутренности цикла
 				
 				//alert(JSON.stringify(segment));
-				//outputToLog("sdel:"+JSON.stringify(segmdel));
+				//Log("sdel:"+JSON.stringify(segmdel));
 
 
 
@@ -916,8 +970,97 @@ function is_planar(_gr)
 }
 
 
-//let a=[1,2,3];
-//alert(a["1"]);
+
+
+
+
+
+
+
+
+
+
+
+function test_answer(_gr,_usl)
+{
+	let gr=JSON.parse(_gr);
+	let usl=JSON.parse(_usl);
+	//alert("ttt");
+	if(usl.t==1)//create graph with...
+	{
+		if(gr.n<=0)
+			return false;
+		/*
+		n-versh[1,2,3,4...]
+		reg-regular[0,1,2,3,4,5,-1(isnt reg),-2(any reg)]
+		dvud-dvudolnost[true,false]
+		fulldvud-full dfudoln[true,false]
+		planar-[true,false]
+		*/
+		if(usl.u.n !== undefined)
+		{
+			//alert("Need n:"+usl.u.n);
+			let res=gr.n;
+			//alert("res:"+res);
+			if(usl.u.n != res)
+				return false;
+		}
+		if(usl.u.reg !== undefined)
+		{
+			//alert("Need reg:"+usl.u.reg);
+			let res=test_gr_reg(gr);
+			//alert("res:"+res);
+			if(usl.u.reg == -2)
+			{
+				if(res==-1)
+					return false;
+			}
+			else
+			{
+				if(usl.u.reg != res)
+					return false;
+			}
+		}
+		if(usl.u.dvud !== undefined)
+		{
+			//alert("Need dvud:"+usl.u.dvud);
+			let res=test_dvudolnost(gr);
+			//alert("res:"+res);
+			if(usl.u.dvud != res)
+				return false;
+		}
+		if(usl.u.fulldvud !== undefined)
+		{
+			//alert("Need fulldvud:"+usl.u.fulldvud);
+			let res=test_polnaia_dvudolnost(gr);
+			//alert("res:"+res);
+			if(usl.u.fulldvud != res)
+				return false;
+		}
+		if(usl.u.planar !== undefined)
+		{
+			//alert("Need planar:"+usl.u.planar);
+			let res=is_planar(gr);
+			//alert("res:"+res);
+			if(usl.u.planar != res)
+				return false;
+		}
+		return true;
+	}
+
+}
+
+
+
+
+
+
+
+test_answer('{"n":6,"a":[[null,null,null,{"c":0},{"c":0},{"c":0},null],[null,null,null,{"c":0},{"c":0},{"c":0},null],[null,null,null,{"c":0},{"c":0},{"c":0},null],[{"c":0},{"c":0},{"c":0},null,null,null,null],[{"c":0},{"c":0},{"c":0},null,null,null,null],[{"c":0},{"c":0},{"c":0},null,null,null,null]],"point":[{"x":0.404,"y":0.4083333333333333,"c":0},{"x":0.496,"y":0.66,"c":0},{"x":0.573,"y":0.775,"c":0},{"x":0.422,"y":0.7983333333333333,"c":0},{"x":0.576,"y":0.36666666666666664,"c":0},{"x":0.493,"y":0.5066666666666667,"c":0}],"or":0}',
+'{"t":1,"u":{"n":8,"reg":3,"dvud":false,"fulldvud":false,"planar":true}}');
+
+
+
 
 //var res=full_divide([4,9],[4,8,6,9]);
 //var res=(new CYCLE({node:[3,4,5,1,2]}));
